@@ -303,11 +303,14 @@ def authenticate_and_get_token(base_url, client_secret):
         return None
 
     if response.status_code == 200:
-        token = response.headers.get("authorization")
-        if not token:
-            print("[ERROR] Authentication succeeded but authorization token is missing in response headers.")
-            return None
-        return token
+        set_cookie = response.headers.get("set-cookie", "")
+        for part in set_cookie.split(";"):
+            part = part.strip()
+            if part.lower().startswith("authorization="):
+                return part.split("=", 1)[1]
+        print("[ERROR] Authentication succeeded but Authorization cookie is missing in set-cookie header.")
+        print(f"[ERROR] set-cookie header: {set_cookie[:300]}")
+        return None
 
     print(f"[ERROR] Authentication failed (HTTP {response.status_code}): {response.text[:300].strip()}")
     return None
