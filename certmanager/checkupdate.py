@@ -12,17 +12,10 @@ DEBUG = os.environ.get("DEBUG", "false").lower() == "true"
 def debug_request(method, url, headers=None, body=None):
     if not DEBUG:
         return
-    safe_headers = {k: ("***" if k.lower() in ("cookie", "authorization") else v) for k, v in (headers or {}).items()}
     print(f"[DEBUG] --> {method} {url}")
-    print(f"[DEBUG]     Headers: {safe_headers}")
+    print(f"[DEBUG]     Headers: {dict(headers or {})}")
     if body is not None:
-        import copy
-        safe_body = copy.deepcopy(body)
-        if isinstance(safe_body, dict):
-            req = safe_body.get("request", {})
-            if "secretKey" in req:
-                req["secretKey"] = "***"
-        print(f"[DEBUG]     Body: {json.dumps(safe_body)}")
+        print(f"[DEBUG]     Body: {json.dumps(body)}")
 
 def debug_response(url, response):
     if not DEBUG:
@@ -30,7 +23,7 @@ def debug_response(url, response):
     print(f"[DEBUG] <-- {response.status_code} {url}")
     print(f"[DEBUG]     Response Headers: {dict(response.headers)}")
     try:
-        print(f"[DEBUG]     Body: {response.text[:1000]}")
+        print(f"[DEBUG]     Body: {response.text}")
     except Exception:
         pass
 
